@@ -1,0 +1,23 @@
+.trailer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+.trailer-box {
+  width: min(960px, 96%);
+  background: #0b1220;
+  border-radius: 8px;
+  overflow: hidden;
+  color: #fff;
+}
+.trailer-box button {
+  background: transparent;
+  color: #fff;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}

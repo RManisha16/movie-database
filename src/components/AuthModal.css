@@ -1,0 +1,120 @@
+/* overlay */
+.auth-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  inset: 0;
+  display: flex;
+  align-items: center;      /* vertical center */
+  justify-content: center;  /* horizontal center */
+  background: rgba(0, 0, 0, 0.45);
+  z-index: 1200;
+  padding: 20px;
+}
+ 
+/* modal */
+.auth-modal {
+  margin: 0;
+  transform: translateY(0) !important;
+  width: 520px; 
+  max-width: calc(100% - 40px);
+  background: linear-gradient(180deg, #0f2626 0%, #143637 100%);
+  border-radius: 12px;
+  padding: 20px 22px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+  color: #fff;
+  box-sizing: border-box;
+}
+
+
+
+/* title */
+.auth-title {
+  margin: 0 0 12px 0;
+  font-size: 22px;
+  text-align: center;
+  letter-spacing: 0.6px;
+}
+ 
+/* form layout */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+ 
+/* labels bold */
+.auth-label {
+  font-weight: 700;
+  font-size: 13px;
+  color: #e6f7f5;
+  margin-bottom: 4px;
+}
+ 
+/* input width and style */
+.auth-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.07);
+  background: rgba(255,255,255,0.02);
+  color: #e6f7f5;
+  outline: none;
+  font-size: 14px;
+}
+ 
+/* error */
+.auth-error {
+  color: #ffd1d1;
+  background: rgba(255, 50, 50, 0.06);
+  padding: 8px 10px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+ 
+/* actions */
+.auth-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 6px;
+}
+ 
+.auth-primary {
+  flex: 1;
+  background: linear-gradient(180deg,#2dd0f0,#11a4c6);
+  border: none;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: #052028;
+  font-weight: 700;
+  cursor: pointer;
+}
+ 
+.auth-secondary {
+  background: rgba(255,255,255,0.06);
+  color: #e6f7f5;
+  border: none;
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+ 
+/* secondary link toggle */
+.auth-toggle {
+  margin-top: 12px;
+  text-align: center;
+  color: rgba(230,247,245,0.9);
+  font-size: 13px;
+}
+.link-btn {
+  background: none;
+  border: none;
+  color: #6fe1ff;
+  cursor: pointer;
+  font-weight: 700;
+  padding: 0;
+}
+ 
