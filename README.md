@@ -1,55 +1,85 @@
-# Getting Started with Create React App
-
-This project was created using [Create React App](https://github.com/facebook/create-react-app).
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `Environment Variables`
-
-before running the project, create a file named .env in the root folder and add:
-REACT_APP_YOUTUBE_KEY=AIzaSyDUMMY_YOUTUBE_API_KEY
-Restart the server after adding .env
-
-### `Project Features`
-
--Search movies
--Movie details + overview
--play trailer 
--Login/signup(local storage)
--Similar movies
--Categories (Trending, COmedy, Action, Romance, Emotional, Avengers)
-
-### `Project Structure`
-src/
-  api/
-  auth/
-  components/
-  pages/
-  hooks/
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+# FlimHub – React Project
+ 
+A movie browsing web application built using React, OMDb API, custom hooks, reusable components, authentication, and unit testing.
+ 
+---
+ 
+## Project Structure
+- src/
+  - api/                  -> API helper function (tmdb and youtube js)
+  - auth/                 -> AuthProvider (localStorage authentication)
+  - components/
+      - nav/              -> Navbar
+      - movie/            -> MovieCard, SkeletonCard
+      - trailer/          -> TrailerModal
+      - authentication/   -> Login/Signup Modal
+      - Loader.jsx
+  - context/              -> MovieContext
+  - hooks/                -> useFetch custom hook
+  - pages/                -> Home, Movies, MovieDetails, Subpages
+  - App.jsx               -> App routes
+  - index.js
+ 
+ 
+---
+ 
+## Project Features
+ 
+- Search movies using **OMDb API**
+- View **complete movie details**
+- Watch trailers using **YouTube search**
+- Login / Signup using **localStorage auth**
+- Automatic login popup for protected actions
+- Similar movies recommendation (based on genre)
+- Categories:
+  - Trending  
+  - Comedy  
+  - Action  
+  - Romance
+  - Emotional  
+  - Avengers  
+- Reusable components (MovieCard, TrailerModal, Loader)
+- Custom hooks for fetching & debouncing
+ 
+---
+ 
+## Environment Variables (Dummy Example)
+ 
+Create a `.env` file in the root:
+ 
+REACT_APP_OMDB_API_KEY=dummy_omdb_key_here 
+REACT_APP_YOUTUBE_API_KEY=dummy_youtube_key_here
+ 
+---
+ 
+## Getting Started
+ 
+### 1️⃣ Clone the repository
+ 
+git clone <your-repo-url> cd movie-project
+ 
+### 2️⃣ Install dependencies
+ 
+npm install
+ 
+### 3️⃣ Start development server
+ 
+npm run dev
+ 
+### 4️⃣ Build the project
+ 
+npm run build
+ 
+### 5️⃣ Run test cases
+ 
+npm run test
+ 
+---
+ 
+## Notes
+ 
+- All API keys are stored inside `.env`
+- OMDb is used only once via `type=movie`
+- Tests are written using React Testing Library (RTL)
+- Mock files are used for CSS & external modules
+ 
