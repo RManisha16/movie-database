@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import "./Navbar.css";
-import { useAuth } from "../auth/AuthProvider";
-import AuthModal from "./AuthModal";
+import { useAuth } from "../../auth/AuthProvider";
+import AuthModal from "../authentication/AuthModal";
  
 const Navbar = () => {
   const [q, setQ] = useState("");

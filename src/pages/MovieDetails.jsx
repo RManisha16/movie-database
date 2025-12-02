@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+// src/pages/MovieDetails.jsx
+import React, { useState, useEffect } from "react";
 import { NavLink, Outlet, useParams } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
-import { getMovieDetailsUrl } from "../api/tmdb";
+import { getMovieDetailsUrl, getCategoryUrlForPhrase } from "../api/tmdb";
 import Loader from "../components/Loader";
-import TrailerModal from "../components/TrailerModal";
+import TrailerModal from "../components/trailer/TrailerModal";
 import { searchTrailerVideoId } from "../api/youtube";
+import MovieCard from "../components/movie/MovieCard";
  
 import { useAuth } from "../auth/AuthProvider";
  
@@ -18,50 +20,222 @@ export default function MovieDetails() {
   const [videoId, setVideoId] = useState(null);
   const [loadingTrailer, setLoadingTrailer] = useState(false);
  
-  const handlePlayTrailer = async () => {
-    if (!isAuthenticated) {
-      window.dispatchEvent(new CustomEvent("openAuth", {
-        detail: {
-          initialMode: "login",
-          onSuccess: async () => {
-            try {
-              await handlePlayTrailer();
-            } catch (err) {
-              console.error(err);
+  // ---------- SIMILAR MOVIES STATE ----------
+  const [similarMovies, setSimilarMovies] = useState([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(false);
+ 
+  // helper: fetch search results for a phrase (use 1-2 pages to increase hits)
+  const fetchSearchForPhrase = async (phrase, pages = [1, 2]) => {
+    try {
+      const results = [];
+      for (const p of pages) {
+        const url = getCategoryUrlForPhrase(phrase, p);
+        const r = await fetch(url).catch(() => null);
+        if (!r) continue;
+        const j = await r.json().catch(() => null);
+        if (Array.isArray(j?.Search)) results.push(...j.Search);
+      }
+      return results;
+    } catch {
+      return [];
+    }
+  };
+ 
+  // helper: fetch details by imdbID (use your getMovieDetailsUrl)
+  const fetchDetailsById = async (imdbID) => {
+    try {
+      const url = getMovieDetailsUrl(imdbID);
+      const r = await fetch(url).catch(() => null);
+      if (!r) return null;
+      const j = await r.json().catch(() => null);
+      if (j?.Response === "True") return j;
+      return null;
+    } catch {
+      return null;
+    }
+  };
+ 
+  // load similar movies when `data` becomes available
+  useEffect(() => {
+    if (!data) {
+      setSimilarMovies([]);
+      return;
+    }
+ 
+    let cancelled = false;
+ 
+    const loadSimilar = async () => {
+      setLoadingSimilar(true);
+      try {
+        const phrasesSet = new Set();
+ 
+        // 1) genres — top 1-2
+        if (data.Genre) {
+          data.Genre.split(",").slice(0, 2).forEach((g) => {
+            const trimmed = g.trim();
+            if (trimmed) phrasesSet.add(trimmed);
+          });
+        }
+ 
+        // 2) actors — first 2 actor names
+        if (data.Actors) {
+          data.Actors.split(",").slice(0, 2).forEach((a) => {
+            const name = a.split(" as ")[0].trim();
+            if (name) phrasesSet.add(name);
+          });
+        }
+ 
+        // 3) director (first)
+        if (data.Director) {
+          data.Director.split(",").slice(0, 1).forEach((d) => {
+            const t = d.trim();
+            if (t) phrasesSet.add(t);
+          });
+        }
+ 
+        // 4) meaningful title keywords (length > 3)
+        if (data.Title) {
+          data.Title.split(/\s+/).filter((w) => w.length > 3).slice(0, 3).forEach((w) => {
+            phrasesSet.add(w);
+          });
+        }
+ 
+        const phrases = Array.from(phrasesSet).slice(0, 6);
+        if (phrases.length === 0) {
+          setSimilarMovies([]);
+          setLoadingSimilar(false);
+          return;
+        }
+ 
+        // fetch candidates for each phrase (2 pages each)
+        const arrays = await Promise.all(phrases.map((p) => fetchSearchForPhrase(p, [1, 2])));
+        const flat = arrays.flat();
+ 
+        // dedupe by imdbID and exclude current movie
+        const seen = new Set();
+        const candidates = [];
+        for (const s of flat) {
+          if (!s?.imdbID) continue;
+          if (s.imdbID === data.imdbID) continue;
+          if (!seen.has(s.imdbID)) {
+            seen.add(s.imdbID);
+            candidates.push(s);
+          }
+        }
+ 
+        // fallback: if no candidates, try searching by first genre with more pages
+        if (candidates.length === 0 && data.Genre) {
+          const fallbackPhrase = data.Genre.split(",")[0].trim();
+          const fb = await fetchSearchForPhrase(fallbackPhrase, [1, 2, 3]);
+          for (const s of fb) {
+            if (!s?.imdbID || s.imdbID === data.imdbID) continue;
+            if (!seen.has(s.imdbID)) {
+              seen.add(s.imdbID);
+              candidates.push(s);
             }
           }
         }
-      }));
-      return;
-    }
  
-    if (videoId) {
-      setOpenTrailer(true);
-      return;
-    }
+        // limit top candidates to avoid too many detail requests
+        const top = candidates.slice(0, 20);
+        const detailsArr = await Promise.all(top.map((t) => fetchDetailsById(t.imdbID)));
  
-    const title = data?.Title ?? data?.title ?? "";
-    if (!title) {
-      window.open("https://www.youtube.com/results?search_query=trailer", "_blank");
-      return;
-    }
+        // build final similar list — permissive (prefer same genre when possible)
+        const targetGenreMain = (data.Genre || "").split(",")[0].trim().toLowerCase();
  
-    setLoadingTrailer(true);
-    try {
-      const vId = await searchTrailerVideoId(title);
-      if (vId) {
-        setVideoId(vId);
-        setOpenTrailer(true);
-      } else {
-        window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(title + " trailer")}`, "_blank");
+        const final = [];
+        for (let i = 0; i < detailsArr.length; i++) {
+          const d = detailsArr[i];
+          if (!d) continue;
+          if (d.imdbID === data.imdbID) continue;
+ 
+          // if poster absent, still include but it's okay
+          final.push({
+            id: d.imdbID,
+            title: d.Title,
+            year: d.Year,
+            poster: d.Poster,
+            raw: d,
+          });
+        }
+ 
+        if (!cancelled) {
+          setSimilarMovies(final.slice(0, 8));
+        }
+      } catch (err) {
+        console.error("loadSimilar failed", err);
+        if (!cancelled) setSimilarMovies([]);
+      } finally {
+        if (!cancelled) setLoadingSimilar(false);
       }
-    } catch (err) {
-      console.error("Trailer lookup failed", err);
+    };
+ 
+    loadSimilar();
+ 
+    return () => {
+      cancelled = true;
+    };
+  }, [data]);
+ 
+  // unified handlePlayTrailer — replace any other definitions (only one should remain)
+const handlePlayTrailer = async () => {
+  console.log("handlePlayTrailer called — isAuthenticated:", isAuthenticated, "videoId:", videoId);
+ 
+  // 1) If user not logged in -> ask Navbar to open auth modal and provide callback
+  if (!isAuthenticated) {
+    console.log("User not authenticated -> dispatching openAuth");
+    window.dispatchEvent(new CustomEvent("openAuth", {
+      detail: {
+        initialMode: "login",
+        onSuccess: async () => {
+          console.log("onSuccess callback called (after login). Re-running handlePlayTrailer...");
+          try {
+            // re-run the same flow; ensure we don't re-enter an infinite loop
+            await handlePlayTrailer();
+          } catch (err) {
+            console.error("Retry after login failed:", err);
+          }
+        }
+      }
+    }));
+    return;
+  }
+ 
+  // 2) If already found video id -> open modal
+  if (videoId) {
+    console.log("videoId already available -> open trailer modal");
+    setOpenTrailer(true);
+    return;
+  }
+ 
+  // 3) Lookup by title and open / fallback
+  const title = data?.Title ?? data?.title ?? "";
+  if (!title) {
+    console.log("No title available, opening generic youtube search");
+    window.open("https://www.youtube.com/results?search_query=trailer", "_blank");
+    return;
+  }
+ 
+  setLoadingTrailer(true);
+  try {
+    console.log("Searching trailer for:", title);
+    const vId = await searchTrailerVideoId(title);
+    if (vId) {
+      console.log("Found trailer id:", vId);
+      setVideoId(vId);
+      setOpenTrailer(true);
+    } else {
+      console.log("No vId found, opening youtube search for title trailer");
       window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(title + " trailer")}`, "_blank");
-    } finally {
-      setLoadingTrailer(false);
     }
-  };
+  } catch (err) {
+    console.error("Trailer lookup failed", err);
+    window.open(`https://www.youtube.com/results?search_query=${encodeURIComponent(title + " trailer")}`, "_blank");
+  } finally {
+    setLoadingTrailer(false);
+  }
+};
+ 
  
   if (loading) return <Loader />;
   if (!data) return <div className="page"><h2>Movie not found.</h2></div>;
@@ -175,6 +349,23 @@ export default function MovieDetails() {
             <Outlet context={data} />
           </div>
         </div>
+      </div>
+ 
+      {/* SIMILAR MOVIES */}
+      <div style={{ marginTop: 28 }}>
+        <h3 style={{ marginBottom: 12 }}>Similar movies</h3>
+ 
+        {loadingSimilar ? (
+          <p>Loading similar movies…</p>
+        ) : similarMovies.length === 0 ? (
+          <p style={{ color: "#888" }}>No similar movies found.</p>
+        ) : (
+          <div className="movie-grid similar-grid">
+            {similarMovies.map((m) => (
+              <MovieCard key={m.id} movie={m} />
+            ))}
+          </div>
+        )}
       </div>
  
       {/* TRAILER MODAL */}

@@ -1,4 +1,4 @@
-const KEY = "20da2eb7";
+const KEY = "e0829950";
 const BASE = `https://www.omdbapi.com/?apikey=${KEY}&type=movie`;
 
 const CATEGORY_QUERIES = {

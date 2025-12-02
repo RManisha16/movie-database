@@ -2,10 +2,10 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "./MovieCard.css";
  
-import { useAuth } from "../auth/AuthProvider";
-import AuthModal from "./AuthModal";
-import TrailerModal from "./TrailerModal";
-import { searchTrailerVideoId } from "../api/youtube";
+import { useAuth } from "../../auth/AuthProvider";
+import AuthModal from "../authentication/AuthModal";
+import TrailerModal from "../trailer/TrailerModal";
+import { searchTrailerVideoId } from "../../api/youtube";
  
 const MovieCard = ({ movie }) => {
   const poster = movie.poster || movie.Poster || "";

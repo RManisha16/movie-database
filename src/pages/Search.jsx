@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import MovieCard from "../components/MovieCard";
+import MovieCard from "../components/movie/MovieCard";
 import SkeletonMovieCard from "../components/SkeletonMovieCard";
 import { searchMovieUrl } from "../api/tmdb";
  
