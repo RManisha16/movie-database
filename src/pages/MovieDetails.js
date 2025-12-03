@@ -19,11 +19,17 @@ export default function MovieDetails() {
   const [videoId, setVideoId] = useState(null);
   const [loadingTrailer, setLoadingTrailer] = useState(false);
  
+<<<<<<< HEAD:src/pages/MovieDetails.js
 
   const [similarMovies, setSimilarMovies] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
  
 
+=======
+  const [similarMovies, setSimilarMovies] = useState([]);
+  const [loadingSimilar, setLoadingSimilar] = useState(false);
+ 
+>>>>>>> e06dd67fb581e1eaf180ad0ae407f385f1674cdf:src/pages/MovieDetails.jsx
   const fetchSearchForPhrase = async (phrase, pages = [1, 2]) => {
     try {
       const results = [];
@@ -40,7 +46,10 @@ export default function MovieDetails() {
     }
   };
  
+<<<<<<< HEAD:src/pages/MovieDetails.js
 
+=======
+>>>>>>> e06dd67fb581e1eaf180ad0ae407f385f1674cdf:src/pages/MovieDetails.jsx
   const fetchDetailsById = async (imdbID) => {
     try {
       const url = getMovieDetailsUrl(imdbID);
@@ -54,7 +63,11 @@ export default function MovieDetails() {
     }
   };
  
+<<<<<<< HEAD:src/pages/MovieDetails.js
 
+=======
+ 
+>>>>>>> e06dd67fb581e1eaf180ad0ae407f385f1674cdf:src/pages/MovieDetails.jsx
   useEffect(() => {
     if (!data) {
       setSimilarMovies([]);
@@ -68,7 +81,11 @@ export default function MovieDetails() {
       try {
         const phrasesSet = new Set();
  
+<<<<<<< HEAD:src/pages/MovieDetails.js
 
+=======
+  
+>>>>>>> e06dd67fb581e1eaf180ad0ae407f385f1674cdf:src/pages/MovieDetails.jsx
         if (data.Genre) {
           data.Genre.split(",").slice(0, 2).forEach((g) => {
             const trimmed = g.trim();
@@ -76,7 +93,11 @@ export default function MovieDetails() {
           });
         }
  
+<<<<<<< HEAD:src/pages/MovieDetails.js
 
+=======
+ 
+>>>>>>> e06dd67fb581e1eaf180ad0ae407f385f1674cdf:src/pages/MovieDetails.jsx
         if (data.Actors) {
           data.Actors.split(",").slice(0, 2).forEach((a) => {
             const name = a.split(" as ")[0].trim();
@@ -169,7 +190,11 @@ export default function MovieDetails() {
     };
   }, [data]);
  
+<<<<<<< HEAD:src/pages/MovieDetails.js
   const handlePlayTrailer = async () => {
+=======
+const handlePlayTrailer = async () => {
+>>>>>>> e06dd67fb581e1eaf180ad0ae407f385f1674cdf:src/pages/MovieDetails.jsx
   console.log("handlePlayTrailer called — isAuthenticated:", isAuthenticated, "videoId:", videoId);
  
 
@@ -192,12 +217,20 @@ export default function MovieDetails() {
     return;
   }
  
+<<<<<<< HEAD:src/pages/MovieDetails.js
+=======
+
+>>>>>>> e06dd67fb581e1eaf180ad0ae407f385f1674cdf:src/pages/MovieDetails.jsx
   if (videoId) {
     console.log("videoId already available -> open trailer modal");
     setOpenTrailer(true);
     return;
   }
  
+<<<<<<< HEAD:src/pages/MovieDetails.js
+=======
+
+>>>>>>> e06dd67fb581e1eaf180ad0ae407f385f1674cdf:src/pages/MovieDetails.jsx
   const title = data?.Title ?? data?.title ?? "";
   if (!title) {
     console.log("No title available, opening generic youtube search");

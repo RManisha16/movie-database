@@ -102,4 +102,8 @@ Restart the dev server after changing `.env`.
 - OMDb is used only once via `type=movie`
 - Tests are written using React Testing Library (RTL)
 - Mock files are used for CSS & external modules
+<<<<<<< HEAD
  
+=======
+ 
+>>>>>>> e06dd67fb581e1eaf180ad0ae407f385f1674cdf
