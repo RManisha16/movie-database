@@ -1,6 +1,6 @@
 # FlimHub – React Project
  
-A movie browsing web application built using React, OMDb API, custom hooks, reusable components, authentication, and unit testing.
+A movie browsing web application built using React, OMDb API, custom hooks, reusable components, and authentication.
  
 ---
  
