@@ -1,22 +1,31 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect, useCallback } from "react";
  
-const useFetch = (url) => {
+export default function useFetch(url) {
   const [data, setData] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(Boolean(url));
+  const [error, setError] = useState(null);
  
-  useEffect(() => {
+  const fetchData = useCallback(async (signal) => {
+    if (!url) return;
     setLoading(true);
-    fetch(url)
-      .then((res) => res.json())
-      .then((json) => {
-        setData(json);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    setError(null);
+    try {
+      const res = await fetch(url, { signal });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const json = await res.json();
+      setData(json);
+    } catch (err) {
+      if (err.name !== "AbortError") setError(err);
+    } finally {
+      setLoading(false);
+    }
   }, [url]);
  
-  return { data, loading };
-};
+  useEffect(() => {
+    const controller = new AbortController();
+    fetchData(controller.signal);
+    return () => controller.abort();
+  }, [url, fetchData]);
  
-export default useFetch;
- 
+  return { data, loading, error, refetch: fetchData };
+}

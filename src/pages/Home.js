@@ -11,7 +11,6 @@ import {
 const CATEGORY_TO_GENRE = {
   comedy: "Comedy",
   action: "Action",
-  romance: "Romance",
   emotional: "Drama", 
 };
  
@@ -132,7 +131,7 @@ const Home = () => {
     <div className="page">
       {/* Category Buttons */}
       <div className="category-buttons">
-        {["trending", "avengers", "comedy", "action", "romance", "emotional"].map((catKey) => (
+        {["trending", "avengers", "comedy", "action", "emotional"].map((catKey) => (
           <button
             key={catKey}
             className={category === catKey ? "active-btn" : ""}

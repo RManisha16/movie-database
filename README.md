@@ -1,70 +1,85 @@
-# Getting Started with Create React App
-
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
-
-## Available Scripts
-
-In the project directory, you can run:
-
-### `npm start`
-
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
-
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm test`
-
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
-
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+# FlimHub – React Project
+ 
+A movie browsing web application built using React, OMDb API, custom hooks, reusable components, authentication, and unit testing.
+ 
+---
+ 
+## Project Structure
+- src/
+  - api/                  -> API helper function (tmdb & youtube js)
+  - auth/                 -> AuthProvider (localStorage authentication)
+  - components/
+      - nav/              -> Navbar
+      - movie/            -> MovieCard, SkeletonCard
+      - trailer/          -> TrailerModal
+      - authentication/   -> Login/Signup Modal
+      - Loader.jsx
+  - context/              -> MovieContext
+  - hooks/                -> useFetch custom hook
+  - pages/                -> Home, Movies, MovieDetails, Subpages
+  - App.jsx               -> App routes
+  - index.js
+ 
+ 
+---
+ 
+## Project Features
+ 
+- Search movies using **OMDb API**
+- View **complete movie details**
+- Watch trailers using **YouTube search**
+- Login / Signup using **localStorage auth**
+- Automatic login popup for protected actions
+- Similar movies recommendation (based on genre)
+- Categories:
+  - Trending  
+  - Comedy  
+  - Action  
+  - Romance
+  - Emotional  
+  - Avengers  
+- Reusable components (MovieCard, TrailerModal, Loader)
+- Custom hooks for fetching & debouncing
+ 
+---
+ 
+## Environment Variables (Dummy Example)
+ 
+Create a `.env` file in the root:
+ 
+REACT_APP_OMDB_API_KEY=dummy_omdb_key_here 
+REACT_APP_YOUTUBE_API_KEY=dummy_youtube_key_here
+ 
+---
+ 
+## Getting Started
+ 
+### 1️⃣ Clone the repository
+ 
+git clone <your-repo-url> cd movie-project
+ 
+### 2️⃣ Install dependencies
+ 
+npm install
+ 
+### 3️⃣ Start development server
+ 
+npm run dev
+ 
+### 4️⃣ Build the project
+ 
+npm run build
+ 
+### 5️⃣ Run test cases
+ 
+npm run test
+ 
+---
+ 
+## Notes
+ 
+- All API keys are stored inside `.env`
+- OMDb is used only once via `type=movie`
+- Tests are written using React Testing Library (RTL)
+- Mock files are used for CSS & external modules
+ 

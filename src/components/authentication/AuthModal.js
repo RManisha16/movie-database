@@ -45,9 +45,9 @@ export default function AuthModal({ open, onClose, onSuccess, initialMode = "log
  
       if (res?.ok) {
         console.log("AuthModal: success -> calling onClose then onSuccess");
+        onSuccess?.();
         onClose?.();
         // call onSuccess after a tick so parent state can close modal
-        setTimeout(() => onSuccess?.(), 10);
       } else {
         setError(res?.message || "Auth failed");
       }

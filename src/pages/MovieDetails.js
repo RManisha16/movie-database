@@ -1,4 +1,3 @@
-// src/pages/MovieDetails.jsx
 import React, { useState, useEffect } from "react";
 import { NavLink, Outlet, useParams } from "react-router-dom";
 import useFetch from "../hooks/useFetch";
@@ -20,11 +19,11 @@ export default function MovieDetails() {
   const [videoId, setVideoId] = useState(null);
   const [loadingTrailer, setLoadingTrailer] = useState(false);
  
-  // ---------- SIMILAR MOVIES STATE ----------
+
   const [similarMovies, setSimilarMovies] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
  
-  // helper: fetch search results for a phrase (use 1-2 pages to increase hits)
+
   const fetchSearchForPhrase = async (phrase, pages = [1, 2]) => {
     try {
       const results = [];
@@ -41,7 +40,7 @@ export default function MovieDetails() {
     }
   };
  
-  // helper: fetch details by imdbID (use your getMovieDetailsUrl)
+
   const fetchDetailsById = async (imdbID) => {
     try {
       const url = getMovieDetailsUrl(imdbID);
@@ -55,7 +54,7 @@ export default function MovieDetails() {
     }
   };
  
-  // load similar movies when `data` becomes available
+
   useEffect(() => {
     if (!data) {
       setSimilarMovies([]);
@@ -69,7 +68,7 @@ export default function MovieDetails() {
       try {
         const phrasesSet = new Set();
  
-        // 1) genres — top 1-2
+
         if (data.Genre) {
           data.Genre.split(",").slice(0, 2).forEach((g) => {
             const trimmed = g.trim();
@@ -77,7 +76,7 @@ export default function MovieDetails() {
           });
         }
  
-        // 2) actors — first 2 actor names
+
         if (data.Actors) {
           data.Actors.split(",").slice(0, 2).forEach((a) => {
             const name = a.split(" as ")[0].trim();
@@ -85,7 +84,7 @@ export default function MovieDetails() {
           });
         }
  
-        // 3) director (first)
+
         if (data.Director) {
           data.Director.split(",").slice(0, 1).forEach((d) => {
             const t = d.trim();
@@ -93,7 +92,6 @@ export default function MovieDetails() {
           });
         }
  
-        // 4) meaningful title keywords (length > 3)
         if (data.Title) {
           data.Title.split(/\s+/).filter((w) => w.length > 3).slice(0, 3).forEach((w) => {
             phrasesSet.add(w);
@@ -107,11 +105,9 @@ export default function MovieDetails() {
           return;
         }
  
-        // fetch candidates for each phrase (2 pages each)
         const arrays = await Promise.all(phrases.map((p) => fetchSearchForPhrase(p, [1, 2])));
         const flat = arrays.flat();
  
-        // dedupe by imdbID and exclude current movie
         const seen = new Set();
         const candidates = [];
         for (const s of flat) {
@@ -123,7 +119,6 @@ export default function MovieDetails() {
           }
         }
  
-        // fallback: if no candidates, try searching by first genre with more pages
         if (candidates.length === 0 && data.Genre) {
           const fallbackPhrase = data.Genre.split(",")[0].trim();
           const fb = await fetchSearchForPhrase(fallbackPhrase, [1, 2, 3]);
@@ -136,11 +131,9 @@ export default function MovieDetails() {
           }
         }
  
-        // limit top candidates to avoid too many detail requests
         const top = candidates.slice(0, 20);
         const detailsArr = await Promise.all(top.map((t) => fetchDetailsById(t.imdbID)));
  
-        // build final similar list — permissive (prefer same genre when possible)
         const targetGenreMain = (data.Genre || "").split(",")[0].trim().toLowerCase();
  
         const final = [];
@@ -149,7 +142,6 @@ export default function MovieDetails() {
           if (!d) continue;
           if (d.imdbID === data.imdbID) continue;
  
-          // if poster absent, still include but it's okay
           final.push({
             id: d.imdbID,
             title: d.Title,
@@ -177,11 +169,10 @@ export default function MovieDetails() {
     };
   }, [data]);
  
-  // unified handlePlayTrailer — replace any other definitions (only one should remain)
-const handlePlayTrailer = async () => {
+  const handlePlayTrailer = async () => {
   console.log("handlePlayTrailer called — isAuthenticated:", isAuthenticated, "videoId:", videoId);
  
-  // 1) If user not logged in -> ask Navbar to open auth modal and provide callback
+
   if (!isAuthenticated) {
     console.log("User not authenticated -> dispatching openAuth");
     window.dispatchEvent(new CustomEvent("openAuth", {
@@ -190,7 +181,7 @@ const handlePlayTrailer = async () => {
         onSuccess: async () => {
           console.log("onSuccess callback called (after login). Re-running handlePlayTrailer...");
           try {
-            // re-run the same flow; ensure we don't re-enter an infinite loop
+
             await handlePlayTrailer();
           } catch (err) {
             console.error("Retry after login failed:", err);
@@ -201,14 +192,12 @@ const handlePlayTrailer = async () => {
     return;
   }
  
-  // 2) If already found video id -> open modal
   if (videoId) {
     console.log("videoId already available -> open trailer modal");
     setOpenTrailer(true);
     return;
   }
  
-  // 3) Lookup by title and open / fallback
   const title = data?.Title ?? data?.title ?? "";
   if (!title) {
     console.log("No title available, opening generic youtube search");

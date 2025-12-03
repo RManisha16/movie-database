@@ -1,14 +1,13 @@
-const YT_BASE = "https://www.googleapis.com/youtube/v3";
-const YT_KEY = process.env.REACT_APP_YOUTUBE_KEY;
- 
-
 export async function searchTrailerVideoId(title) {
   if (!YT_KEY) {
     console.warn("REACT_APP_YOUTUBE_KEY not set in .env");
     return null;
   }
   if (!title) return null;
- 
+
+  const YT_BASE = process.env.REACT_APP_YOUTUBE_BASE
+  const YT_KEY = process.env.REACT_APP_YOUTUBE_KEY;
+  
   const q = `${title} trailer`;
   const url = `${YT_BASE}/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(q)}&key=${YT_KEY}`;
  

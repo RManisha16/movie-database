@@ -24,19 +24,23 @@ const Navbar = () => {
     window.addEventListener("openAuth", onOpenAuth);
     return () => window.removeEventListener("openAuth", onOpenAuth);
   }, []);
- 
+  
   const handleAuthSuccess = () => {
     console.log("Navbar: handleAuthSuccess called");
     setOpenAuth(false);
- 
     const cb = pendingAuthCallbackRef.current;
     pendingAuthCallbackRef.current = null;
     if (typeof cb === "function") {
-      try {
-        setTimeout(() => cb(), 20);
-      } catch (err) {
-        console.error("pendingAuthCallback failed", err);
+      let tries = 0;
+      function waitForAuth() {
+        if (tries++ > 10) return; 
+        if (isAuthenticated) {
+          setTimeout(() => cb(), 20);
+        } else {
+          setTimeout(waitForAuth, 50);
+        }
       }
+      waitForAuth();
     }
   };
  
