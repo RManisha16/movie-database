@@ -46,7 +46,7 @@ A movie browsing web application built using React, OMDb API, custom hooks, reus
  
 ---
  
-## Environment Variables (Dummy Example)
+## Environment Variables 
  
 Create a `.env` file in the root:
  
