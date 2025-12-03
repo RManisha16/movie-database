@@ -6,24 +6,49 @@ A movie browsing web application built using React, OMDb API, custom hooks, reus
  
 ## Project Structure
 src/
+│
 ├─ api/
-│  └─ omdb.js
-├─ components/        # reusable UI (PascalCase)
-│  ├─ MovieCard/
-│  │  ├─ MovieCard.jsx
-│  │  ├─ MovieCard.css
-│  │  └─ MovieCard.test.jsx
-│  └─ Navbar/
-├─ pages/             # page-level components (PascalCase)
-│  ├─ Home/
-│  │  └─ Home.jsx
-│  └─ MovieDetails/
-├─ hooks/             # custom hooks (camelCase)
-│  └─ useFetch.js
-├─ context/           # providers e.g. AuthProvider.jsx
-├─ utils/             # helpers, constants
-├─ assets/
-└─ index.js / App.jsx
+│   ├─ tmdb.js               # OMDb API helpers
+│   └─ youtube.js            # YouTube API helpers
+│
+├─ auth/
+│   └─ AuthProvider.js       # Handles login, signup, authentication state
+│
+├─ components/
+│   ├─ authentication/
+│   │   ├─ AuthModal.css
+│   │   └─ AuthModal.js      # Popup Login/Signup Modal
+│   │
+│   ├─ movie/
+│   │   ├─ MovieCard.css
+│   │   └─ MovieCard.js      # Single movie card UI
+│   │
+│   ├─ nav/
+│   │   ├─ Navbar.css
+│   │   └─ Navbar.js         # Navigation bar
+│   │
+│   ├─ trailer/
+│   │   ├─ TrailerModal.css
+│   │   └─ TrailerModal.js   # YouTube trailer popup
+│   │
+│   ├─ Loader.js             # Reusable loader UI
+│   └─ ScrollButtons.js      # Scroll left/right buttons
+│
+├─ hooks/
+│   └─ useFetch.js           # Custom API data fetching hook
+│
+├─ pages/
+│   ├─ Cast.js
+│   ├─ Home.js
+│   ├─ MovieDetails.js
+│   ├─ Movies.js
+│   ├─ Overview.js
+│   ├─ Reviews.js
+│   └─ Search.js
+│
+├─ App.jsx                   # Main app routing + layout
+└─ index.css                 # Global root styles
+ 
  
  
  
