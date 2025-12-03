@@ -21,7 +21,7 @@ A movie browsing web application built using React, OMDb API, custom hooks, reus
   - pages/                -> Home, Movies, MovieDetails, Subpages
   - App.jsx               -> App routes
   - index.js
-  - package.json
+- package.json
  
  
 ---
