@@ -5,6 +5,8 @@ A movie browsing web application built using React, OMDb API, custom hooks, reus
 ---
  
 ## Project Structure
+- .vscode      
+- public                  -> To store the images & html file
 - src/
   - api/                  -> API helper function (tmdb and youtube js)
   - auth/                 -> AuthProvider (localStorage authentication)
@@ -19,6 +21,7 @@ A movie browsing web application built using React, OMDb API, custom hooks, reus
   - pages/                -> Home, Movies, MovieDetails, Subpages
   - App.jsx               -> App routes
   - index.js
+  - package.json
  
  
 ---
