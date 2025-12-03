@@ -5,23 +5,26 @@ A movie browsing web application built using React, OMDb API, custom hooks, reus
 ---
  
 ## Project Structure
-- .vscode      
-- public                  -> To store the images & html file
-- src/
-  - api/                  -> API helper function (tmdb and youtube js)
-  - auth/                 -> AuthProvider (localStorage authentication)
-  - components/
-      - nav/              -> Navbar
-      - movie/            -> MovieCard, SkeletonCard
-      - trailer/          -> TrailerModal
-      - authentication/   -> Login/Signup Modal
-      - Loader.jsx
-  - context/              -> MovieContext
-  - hooks/                -> useFetch custom hook
-  - pages/                -> Home, Movies, MovieDetails, Subpages
-  - App.jsx               -> App routes
-  - index.js
-- package.json
+src/
+├─ api/
+│  └─ omdb.js
+├─ components/        # reusable UI (PascalCase)
+│  ├─ MovieCard/
+│  │  ├─ MovieCard.jsx
+│  │  ├─ MovieCard.css
+│  │  └─ MovieCard.test.jsx
+│  └─ Navbar/
+├─ pages/             # page-level components (PascalCase)
+│  ├─ Home/
+│  │  └─ Home.jsx
+│  └─ MovieDetails/
+├─ hooks/             # custom hooks (camelCase)
+│  └─ useFetch.js
+├─ context/           # providers e.g. AuthProvider.jsx
+├─ utils/             # helpers, constants
+├─ assets/
+└─ index.js / App.jsx
+ 
  
  
 ---
@@ -50,32 +53,21 @@ A movie browsing web application built using React, OMDb API, custom hooks, reus
  
 Create a `.env` file in the root:
  
-REACT_APP_OMDB_API_KEY=dummy_omdb_key_here 
-REACT_APP_YOUTUBE_API_KEY=dummy_youtube_key_here
- 
+REACT_APP_OMDB_KEY=dummy_omdb_key_here 
+REACT_APP_YOUTUBE_KEY=dummy_youtube_key_here
+REACT_APP_OMDB_BASE=https://www.omdbapi.com/ 
+REACT_APP_YOUTUBE_BASE=https://www.google.com/youtube/v3
+
+Restart the dev server after changing `.env`.
+
 ---
  
-## Getting Started
- 
-### 1️⃣ Clone the repository
- 
-git clone <your-repo-url> cd movie-project
- 
-### 2️⃣ Install dependencies
- 
-npm install
- 
-### 3️⃣ Start development server
- 
-npm run dev
- 
-### 4️⃣ Build the project
- 
-npm run build
- 
-### 5️⃣ Run test cases
- 
-npm run test
+## Development
+1. `git clone <repo>`
+2. `npm install`
+3. `npm start` — run dev server
+4. `npm run build` — build for production
+5. `npm test` — run tests
  
 ---
  
