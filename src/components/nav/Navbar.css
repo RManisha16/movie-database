@@ -4,25 +4,25 @@
   align-items: center;
   gap: 16px;
   padding: 14px 22px;
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
   backdrop-filter: blur(8px);
-  border-bottom: 1px solid rgba(255,255,255,0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   position: sticky;
   top: 0;
   z-index: 1000;
   /* prevent wrapping */
   flex-wrap: nowrap;
 }
- 
+
 /* LEFT */
 .nav-left {
   display: flex;
   align-items: center;
-  min-width: 0; 
+  min-width: 0;
 }
 
 .navbar .brand {
-  font-family: "Cinzel", serif;
+  font-family: 'Cinzel', serif;
   font-size: 30px;
   font-weight: 700;
   letter-spacing: 1.5px;
@@ -30,7 +30,6 @@
   text-decoration: none;
   text-shadow: 3px 3px 12px rgba(0, 0, 0, 0.45);
 }
- 
 
 a.brand,
 a.brand:focus,
@@ -42,63 +41,61 @@ a.brand:focus-visible,
 .brand:focus-visible {
   outline: none !important;
   box-shadow: none !important;
-  -webkit-box-shadow: none !important; 
+  -webkit-box-shadow: none !important;
   border: none !important;
 }
- 
 
-.brand, a.brand {
+.brand,
+a.brand {
   -webkit-tap-highlight-color: transparent;
 }
- 
 
 a.brand:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(255,255,255,0.08); 
+  box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
 }
- 
 
 .nav-center {
-  flex: 1 1 auto; 
+  flex: 1 1 auto;
   display: flex;
-  justify-content: center; 
-  min-width: 0; 
+  justify-content: center;
+  min-width: 0;
 }
- 
+
 /* search form */
 .search-form {
   display: flex;
   align-items: center;
-  width: 60%;          
+  width: 60%;
   max-width: 900px;
-  min-width: 200px;    
-  background: rgba(255,255,255,0.08);
-  border: 1px solid rgba(255,255,255,0.12);
+  min-width: 200px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   padding: 6px 12px;
   border-radius: 40px;
-  box-shadow: 0 6px 16px rgba(0,0,0,0.25);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   transition: 0.2s ease;
   gap: 8px;
   flex: 0 1 auto;
 }
- 
+
 .search-input {
   flex: 1 1 auto;
-  min-width: 0;   
+  min-width: 0;
   border: none;
   outline: none;
-  
+
   background: transparent;
   color: white;
   font-size: 15px;
   padding: 6px;
 }
- 
+
 .search-input::placeholder {
   color: rgba(36, 43, 43, 0.5);
 }
- 
-.search-input:focus{
+
+.search-input:focus {
   outline: none;
   box-shadow: none;
 }
@@ -110,67 +107,91 @@ a.brand:focus-visible {
   cursor: pointer;
   padding: 4px;
 }
- 
+
 /* RIGHT: login/signup */
 .nav-right {
   display: flex;
   align-items: center;
   gap: 10px;
-  flex: 0 0 auto; 
-  white-space: nowrap; 
+  flex: 0 0 auto;
+  white-space: nowrap;
 }
- 
+
 .auth-btn {
-  background: rgba(255,255,255,0.12);
+  background: rgba(255, 255, 255, 0.12);
   padding: 8px 14px;
   border-radius: 8px;
-  border: 1px solid rgba(255,255,255,0.15);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   cursor: pointer;
   color: white;
   font-size: 14px;
   transition: 0.18s ease;
 }
- 
-.auth-btn:hover { background: rgba(255,255,255,0.2); }
- 
+
+.auth-btn:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 .signup {
   background: #1da1f2;
   border: none;
 }
- 
-.signup:hover { background: #1398e6; }
- 
+
+.signup:hover {
+  background: #1398e6;
+}
+
 /* Responsive rules */
 @media (max-width: 1100px) {
-  .search-form { width: 70%; }
-  .brand { font-size: 42px; }
+  .search-form {
+    width: 70%;
+  }
+  .brand {
+    font-size: 42px;
+  }
 }
- 
+
 @media (max-width: 800px) {
-  .navbar { padding: 12px; gap: 10px; }
+  .navbar {
+    padding: 12px;
+    gap: 10px;
+  }
 
-  .brand { font-size: 36px; }
+  .brand {
+    font-size: 36px;
+  }
 
-  .search-form { width: 85%; max-width: 600px; }
-  .nav-right { gap: 8px; }
+  .search-form {
+    width: 85%;
+    max-width: 600px;
+  }
+  .nav-right {
+    gap: 8px;
+  }
 }
- 
 
 @media (max-width: 480px) {
   .navbar {
     flex-wrap: wrap;
     padding: 10px;
   }
-  .nav-left, .nav-right {
+  .nav-left,
+  .nav-right {
     flex: 0 0 100%;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  .nav-center { flex-basis: 100%; order: 2; width: 100%; justify-content: center; }
-  .search-form { width: 95%; }
+  .nav-center {
+    flex-basis: 100%;
+    order: 2;
+    width: 100%;
+    justify-content: center;
+  }
+  .search-form {
+    width: 95%;
+  }
 }
- 
 
 /* AUTH BUTTONS (Login, Sign Up, Logout) */
 .nav-auth-btn {
@@ -185,19 +206,18 @@ a.brand:focus-visible {
   transition: all 0.25s ease;
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
 }
- 
+
 .nav-auth-btn:hover {
   background: linear-gradient(135deg, #11232b, #243442);
   transform: translateY(-2px);
   box-shadow: 0 5px 12px rgba(0, 0, 0, 0.35);
 }
- 
+
 .nav-auth-btn:active {
   transform: scale(0.95);
 }
- 
+
 /* spacing for login + signup together */
 .nav-right button {
   margin-left: 8px;
 }
- 

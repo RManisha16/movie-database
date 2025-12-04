@@ -1,28 +1,24 @@
-export async function searchTrailerVideoId(title) {
-  if (!YT_KEY) {
-    console.warn("REACT_APP_YOUTUBE_KEY not set in .env");
-    return null;
-  }
-  if (!title) return null;
+import axios from 'axios';
 
-  const YT_BASE = process.env.REACT_APP_YOUTUBE_BASE
-  const YT_KEY = process.env.REACT_APP_YOUTUBE_KEY;
-  
-  const q = `${title} trailer`;
-  const url = `${YT_BASE}/search?part=snippet&type=video&maxResults=1&q=${encodeURIComponent(q)}&key=${YT_KEY}`;
- 
+const YT_BASE = process.env.REACT_APP_YOUTUBE_BASE;
+const YT_KEY = process.env.REACT_APP_YOUTUBE_KEY;
+
+export const searchTrailerVideoId = async (title) => {
   try {
-    const res = await fetch(url);
-    if (!res.ok) {
-      console.warn("YouTube API returned status", res.status);
-      return null;
-    }
-    const data = await res.json();
-    const item = (data.items && data.items[0]) || null;
-    return item && item.id && item.id.videoId ? item.id.videoId : null;
-  } catch (err) {
-    console.error("YouTube search error:", err);
+    const { data } = await axios.get(`${YT_BASE}/search`, {
+      params: {
+        key: YT_KEY,
+        part: 'snippet',
+        q: `${title} official trailer`,
+        maxResults: 1,
+        type: 'video',
+        videoEmbeddable: 'true',
+      },
+    });
+
+    const item = data?.items?.[0];
+    return item?.id?.videoId || null;
+  } catch {
     return null;
   }
-}
- 
+};

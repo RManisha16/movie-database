@@ -6,6 +6,5 @@ const SkeletonMovieCard = () => {
     </div>
   );
 };
- 
+
 export default SkeletonMovieCard;
- 
