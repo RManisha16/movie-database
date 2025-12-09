@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
@@ -11,29 +12,80 @@ import Reviews from './pages/Reviews';
 
 import MovieProvider from './context/MovieContext';
 import AuthProvider from './auth/AuthProvider';
+import ErrorBoundary from './components/ErrorBoundary';
+import Footer from './components/footer/Footer';
 
 const App = () => {
   return (
     <AuthProvider>
       <BrowserRouter>
-        {/* AuthProvider at top so all children can access auth state */}
         <MovieProvider>
           <Navbar />
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/search" element={<Search />} />
-            {/* Movie details route with nested children */}
-            <Route path="/movie/:id" element={<MovieDetails />}>
-              {/* index route (when /movie/:id is visited) -> Overview */}
-              <Route index element={<Overview />} />
-              {/* explicit child routes */}
-              <Route path="overview" element={<Overview />} />
-              <Route path="cast" element={<Cast />} />
-              <Route path="reviews" element={<Reviews />} />
+            <Route
+              path="/"
+              element={
+                <ErrorBoundary>
+                  <Home />
+                </ErrorBoundary>
+              }
+            />
+            <Route
+              path="/search"
+              element={
+                <ErrorBoundary>
+                  <Search />
+                </ErrorBoundary>
+              }
+            />
+
+            {/* Movie details route with nested children -> boundary around this section */}
+            <Route
+              path="/movie/:id"
+              element={
+                <ErrorBoundary>
+                  <MovieDetails />
+                </ErrorBoundary>
+              }
+            >
+              <Route
+                index
+                element={
+                  <ErrorBoundary>
+                    <Overview />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="overview"
+                element={
+                  <ErrorBoundary>
+                    <Overview />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="cast"
+                element={
+                  <ErrorBoundary>
+                    <Cast />
+                  </ErrorBoundary>
+                }
+              />
+              <Route
+                path="reviews"
+                element={
+                  <ErrorBoundary>
+                    <Reviews />
+                  </ErrorBoundary>
+                }
+              />
             </Route>
+
             {/* fallback */}
             <Route path="*" element={<h1>404 Page Not Found</h1>} />
           </Routes>
+          <Footer/>
         </MovieProvider>
       </BrowserRouter>
     </AuthProvider>

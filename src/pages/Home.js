@@ -10,42 +10,46 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
 
-  const loadTrending = async (pageNum = 1) => {
+  const didRunRef = useRef(false);
+
+  const loadTrending = (pageNum = 1) => {
     setLoading(true);
     setMovies([]);
 
-    try {
-      const json = await searchMovies('avengers', pageNum);
-      if (json?.Response === 'True' && Array.isArray(json?.Search)) {
-        const mapped = json.Search.slice(0, MAX_DETAILS).map((m) => ({
-          id: m.imdbID,
-          title: m.Title,
-          year: m.Year,
-          poster: m.Poster,
-        }));
-        setMovies(mapped);
-      } else {
+    // If searchMovies is Axios-based, it returns a response object
+    return searchMovies('movie', pageNum)
+      .then((res) => {
+        const json = res?.data ?? res; // supports both axios and fetch shapes
+        if (json?.Response === 'True' && Array.isArray(json?.Search)) {
+          const mapped = json.Search.slice(0, MAX_DETAILS).map((m) => ({
+            id: m.imdbID,
+            title: m.Title,
+            year: m.Year,
+            poster: m.Poster,
+          }));
+          setMovies(mapped);
+        } else {
+          setMovies([]);
+        }
+      })
+      .catch((e) => {
+        console.error('Trending fetch failed', e);
         setMovies([]);
-      }
-    } catch (e) {
-      console.error('Trending fetch failed', e);
-      setMovies([]);
-    } finally {
-      setLoading(false);
-    }
+      })
+      .finally(() => {
+        setLoading(false);
+      });
   };
-
-  const didRunRef = useRef(false);
 
   useEffect(() => {
     if (page === 1 && didRunRef.current) return;
     didRunRef.current = true;
 
     let cancelled = false;
-    (async () => {
-      await loadTrending(page);
+
+    loadTrending(page).finally(() => {
       if (cancelled) return;
-    })();
+    });
 
     return () => {
       cancelled = true;
