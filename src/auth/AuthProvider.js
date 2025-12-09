@@ -23,15 +23,21 @@ function readUsers() {
   try {
     const raw = localStorage.getItem(USERS_KEY);
     return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
+  } catch (err) {
+    // Throw so callers can handle uniformly.
+    throw new Error(`Failed to read users: ${err?.message || 'unknown error'}`);
   }
 }
 
 function writeUsers(users) {
   try {
     localStorage.setItem(USERS_KEY, JSON.stringify(users));
-  } catch {}
+  } catch (err) {
+    // Throw so callers can handle uniformly.
+    throw new Error(
+      `Failed to write users: ${err?.message || 'unknown error'}`
+    );
+  }
 }
 
 export default function AuthProvider({ children }) {
@@ -39,13 +45,20 @@ export default function AuthProvider({ children }) {
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
-    const email = localStorage.getItem(CURRENT_KEY);
-    if (email) {
-      setUser({ email });
-    } else {
+    try {
+      const email = localStorage.getItem(CURRENT_KEY);
+      if (email) {
+        setUser({ email });
+      } else {
+        setUser(null);
+      }
+    } catch (err) {
+      // In effects we can't "return" an error to the caller; log and set to a safe state.
+      console.error('Failed to initialize auth from storage:', err);
       setUser(null);
+    } finally {
+      setInitializing(false);
     }
-    setInitializing(false);
   }, []);
 
   const login = useCallback(async (email, password) => {
@@ -57,7 +70,13 @@ export default function AuthProvider({ children }) {
     if (!e) return { ok: false, message: 'Email required' };
     if (!p) return { ok: false, message: 'Password required' };
 
-    const users = readUsers();
+    let users;
+    try {
+      users = readUsers();
+    } catch (err) {
+      return { ok: false, message: err.message || 'Failed to read users' };
+    }
+
     const found = users.find(
       (u) => (u.email || '').toLowerCase() === e.toLowerCase()
     );
@@ -69,7 +88,10 @@ export default function AuthProvider({ children }) {
 
     try {
       localStorage.setItem(CURRENT_KEY, found.email);
-    } catch {}
+    } catch (err) {
+      return { ok: false, message: err.message || 'Failed to persist session' };
+    }
+
     setUser({ email: found.email });
     return { ok: true };
   }, []);
@@ -83,18 +105,32 @@ export default function AuthProvider({ children }) {
     if (!e) return { ok: false, message: 'Email required' };
     if (!p) return { ok: false, message: 'Password required' };
 
-    const users = readUsers();
+    let users;
+    try {
+      users = readUsers();
+    } catch (err) {
+      return { ok: false, message: err.message || 'Failed to read users' };
+    }
+
     const existing = users.find(
       (u) => (u.email || '').toLowerCase() === e.toLowerCase()
     );
     if (existing) return { ok: false, message: 'Email already registered' };
 
     users.push({ email: e, password: p });
-    writeUsers(users);
+
+    try {
+      writeUsers(users);
+    } catch (err) {
+      return { ok: false, message: err.message || 'Failed to save account' };
+    }
 
     try {
       localStorage.setItem(CURRENT_KEY, e);
-    } catch {}
+    } catch (err) {
+      return { ok: false, message: err.message || 'Failed to persist session' };
+    }
+
     setUser({ email: e });
     return { ok: true };
   }, []);
@@ -102,8 +138,12 @@ export default function AuthProvider({ children }) {
   const logout = useCallback(() => {
     try {
       localStorage.removeItem(CURRENT_KEY);
-    } catch {}
+    } catch (err) {
+      // Return an error so callers can react (e.g., show toast).
+      return { ok: false, message: err.message || 'Failed to clear session' };
+    }
     setUser(null);
+    return { ok: true };
   }, []);
 
   const value = useMemo(

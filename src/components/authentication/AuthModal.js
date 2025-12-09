@@ -29,17 +29,22 @@ export default function AuthModal({
   const handleSubmit = async (ev) => {
     ev?.preventDefault();
     setError('');
+
+    // Client-side validations — return structured errors
     if (!validateEmail(email)) {
-      setError('Please enter a valid email');
-      return;
+      const msg = 'Please enter a valid email';
+      setError(msg);
+      return { ok: false, message: msg };
     }
     if (password.length < 6) {
-      setError('Password must be at least 6 characters');
-      return;
+      const msg = 'Password must be at least 6 characters';
+      setError(msg);
+      return { ok: false, message: msg };
     }
     if (mode === 'signup' && password !== password2) {
-      setError('Passwords do not match');
-      return;
+      const msg = 'Passwords do not match';
+      setError(msg);
+      return { ok: false, message: msg };
     }
 
     setLoading(true);
@@ -49,15 +54,18 @@ export default function AuthModal({
       else res = await signup(email, password);
 
       if (res?.ok) {
-        console.log('AuthModal: success -> calling onClose then onSuccess');
         onSuccess?.();
         onClose?.();
+        return { ok: true };
       } else {
-        setError(res?.message || 'Auth failed');
+        const msg = res?.message || 'Auth failed';
+        setError(msg);
+        return { ok: false, message: msg };
       }
     } catch (err) {
-      console.error(err);
-      setError('Unexpected error');
+      const msg = err?.message || 'Unexpected error'; 
+      setError(msg);
+      return { ok: false, message: msg };
     } finally {
       setLoading(false);
     }

@@ -29,30 +29,42 @@ const MovieCard = ({ movie }) => {
     return `${YT_SEARCH_BASE}${encodeURIComponent(query)}`;
   }, [YT_SEARCH_BASE, title, movie]);
 
+
   const attemptPlay = async () => {
     if (videoId) {
       setOpenTrailer(true);
-      return;
+      return { ok: true };
     }
 
     const q = title || movie?.Title || movie?.name || '';
     if (!q) {
       window.open(fallbackSearchUrl, '_blank');
-      return;
+      return { ok: false, message: 'Missing title to search for trailer' };
     }
 
     setLoadingTrailer(true);
     try {
-      const vId = await searchTrailerVideoId(q);
-      if (vId) {
-        setVideoId(vId);
-        setOpenTrailer(true);
+      const result = await searchTrailerVideoId(q);
+
+      if (result?.ok) {
+        const vId = result.videoId || null;
+        if (vId) {
+          setVideoId(vId);
+          setOpenTrailer(true);
+          return { ok: true };
+        } else {
+          window.open(fallbackSearchUrl, '_blank');
+          return { ok: false, message: 'No trailer video found' };
+        }
       } else {
+        const msg = result?.message || 'Failed to fetch trailer video ID';
         window.open(fallbackSearchUrl, '_blank');
+        return { ok: false, message: msg };
       }
     } catch (err) {
-      console.error('Trailer lookup failed', err);
+      const msg = err?.message || 'Unexpected error while looking up trailer';
       window.open(fallbackSearchUrl, '_blank');
+      return { ok: false, message: msg };
     } finally {
       setLoadingTrailer(false);
     }

@@ -40,7 +40,6 @@ const Search = () => {
         setMovies(normalized);
       } catch (err) {
         if (signal.aborted) return;
-        console.error('Search fetch error:', err);
         setMovies([]);
       } finally {
         if (!signal.aborted) setLoading(false);

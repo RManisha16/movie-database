@@ -28,13 +28,21 @@ const Home = () => {
             poster: m.Poster,
           }));
           setMovies(mapped);
+          return { ok: true }; 
         } else {
+          const msg = json?.Error || 'No movies found for the current page.'; 
           setMovies([]);
+          return { ok: false, message: msg }; 
         }
       })
       .catch((e) => {
-        console.error('Trending fetch failed', e);
+        const msg =
+          e?.response?.data?.status_message ||
+          e?.response?.data?.message ||
+          e?.message ||
+          'Failed to fetch trending movies.';
         setMovies([]);
+        return { ok: false, message: msg }; // <-- structured error from catch
       })
       .finally(() => {
         setLoading(false);

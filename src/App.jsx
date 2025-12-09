@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { BrowserRouter, Route, Routes } from 'react-router-dom';
 
@@ -85,7 +84,7 @@ const App = () => {
             {/* fallback */}
             <Route path="*" element={<h1>404 Page Not Found</h1>} />
           </Routes>
-          <Footer/>
+          <Footer />
         </MovieProvider>
       </BrowserRouter>
     </AuthProvider>

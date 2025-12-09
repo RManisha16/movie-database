@@ -5,14 +5,23 @@ export default function TrailerModal({ open, onClose, videoId }) {
   const EMBED_BASE = process.env.REACT_APP_YOUTUBE_EMBED_BASE;
 
   const src = useMemo(() => {
-    if (!videoId) return '';
+    if (!videoId) return { ok: false, src: '', message: 'Trailer not found.' };
+
+    if (!EMBED_BASE) {
+      return {
+        ok: false,
+        src: '',
+        message: 'YouTube embed base URL is missing.',
+      };
+    }
+
     const url = new URL(EMBED_BASE + videoId);
     url.searchParams.set('autoplay', '1');
     url.searchParams.set('rel', '0');
     return url.toString();
   }, [EMBED_BASE, videoId]);
 
-  if (!open) return null;
+  if (!open) return;
 
   return (
     <div

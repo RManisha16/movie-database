@@ -17,8 +17,15 @@ export const searchTrailerVideoId = async (title) => {
     });
 
     const item = data?.items?.[0];
-    return item?.id?.videoId || null;
-  } catch {
-    return null;
+    return { ok: true, videoId: item?.id?.videoId};
+  } catch (err) {
+    // Return a structured error message
+    return {
+      ok: false,
+      message:
+        err?.response?.data?.error?.message ||
+        err.message ||
+        'Failed to fetch trailer video ID',
+    };
   }
 };
