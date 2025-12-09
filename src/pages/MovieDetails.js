@@ -7,6 +7,9 @@ import { searchTrailerVideoId } from '../api/youtube';
 import MovieCard from '../components/movie/MovieCard';
 import { useAuth } from '../auth/AuthProvider';
 
+const detailsPromiseCache = new Map();
+const detailsDataCache = new Map();
+
 export default function MovieDetails() {
   const { id } = useParams();
   const { isAuthenticated } = useAuth();
@@ -23,12 +26,15 @@ export default function MovieDetails() {
   const [similarMovies, setSimilarMovies] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [shouldLoadSimilar, setShouldLoadSimilar] = useState(false);
-  const similarRef = useRef(null);
-  const inFlightDetailsMapRef = useRef(new Map());
 
+  const similarRef = useRef(null);
+  // Keep per-instance processed/in-flight sets for similar fetches (these are fine as refs)
   const processedSimilarForIdRef = useRef(new Set());
   const inFlightSimilarRef = useRef(new Set());
 
+  // -------------------------------
+  // Effect 1: Fetch movie details using module-level caching to prevent duplicate fetches
+  // -------------------------------
   useEffect(() => {
     if (!id) {
       setDetails(null);
@@ -37,21 +43,36 @@ export default function MovieDetails() {
       return;
     }
 
+    // If we already have resolved data cached, use it (fast path)
+    if (detailsDataCache.has(id)) {
+      setDetails(detailsDataCache.get(id));
+      setDetailsError('');
+      setLoadingDetails(false);
+      // note: we intentionally do NOT clear similarMovies here to preserve existing similar items
+      return;
+    }
+
     setLoadingDetails(true);
     setDetailsError('');
-    setDetails(null);
+    // Do not clear details synchronously here to avoid jarring UI flashes.
+    // setDetails(null);
 
     let cancelled = false;
+    let promise = detailsPromiseCache.get(id);
 
-    let promise = inFlightDetailsMapRef.current.get(id);
     if (!promise) {
-      const controller =
-        typeof AbortController !== 'undefined'
-          ? new AbortController()
-          : undefined;
-
-      promise = getMovieDetails(id, { signal: controller?.signal });
-      inFlightDetailsMapRef.current.set(id, promise);
+      // create a promise and store it globally so remounts reuse it
+      // we don't attach AbortController here to keep a single shared promise.
+      promise = (async () => {
+        try {
+          const res = await getMovieDetails(id);
+          return res;
+        } catch (e) {
+          // rethrow so callers can handle error
+          throw e;
+        }
+      })();
+      detailsPromiseCache.set(id, promise);
     }
 
     (async () => {
@@ -59,6 +80,13 @@ export default function MovieDetails() {
         const res = await promise;
 
         if (cancelled) return;
+
+        // Cache the resolved data for future mounts
+        try {
+          detailsDataCache.set(id, res);
+        } catch (err) {
+          // ignore cache set errors
+        }
 
         if (res?.Response === 'True' || res?.imdbID) {
           setDetails(res);
@@ -77,121 +105,91 @@ export default function MovieDetails() {
           setDetailsError(
             'Unable to load movie details. Please try again later.'
           );
+          // On error we can remove the promise so a retry attempt will re-fetch
+          detailsPromiseCache.delete(id);
+          detailsDataCache.delete(id);
         }
       } finally {
         if (!cancelled) setLoadingDetails(false);
-        inFlightDetailsMapRef.current.delete(id);
       }
     })();
 
     return () => {
       cancelled = true;
+      // we intentionally DO NOT abort the shared promise here because it might be used by another mount
     };
   }, [id]);
 
-  // const inFlightSearchSetRef = useRef(new Set());
-
-  // const fetchSearchForPhrase = React.useCallback(
-  //   async (phrase, pages = [1], { signal } = {}) => {
-  //     try {
-  //       const results = [];
-  //       for (const p of pages) {
-  //         const res = await searchMovies(phrase, p, { signal });
-  //         if (Array.isArray(res?.Search)) results.push(...res.Search);
-  //       }
-  //       return results;
-  //     } catch (e) {
-  //       if (e?.name === 'CanceledError' || e?.name === 'AbortError') return [];
-  //       return [];
-  //     }
-  //   },
-  //   []
-  // );
-
-  // const fetchDetailsById = React.useCallback(
-  //   async (imdbID, { signal } = {}) => {
-  //     try {
-  //       const res = await getMovieDetails(imdbID, { signal });
-  //       if (res?.Response === 'True') return res;
-  //       return undefined;
-  //     } catch (e) {
-  //       if (e?.name === 'CanceledError' || e?.name === 'AbortError')
-  //         return undefined;
-  //       return undefined;
-  //     }
-  //   },
-  //   []
-  // );
-
+  // -------------------------------
+  // Effect 2: IntersectionObserver + imdb -> shouldLoadSimilar + fetch similar
+  // -------------------------------
   useEffect(() => {
-    const el = similarRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setShouldLoadSimilar(true);
-          io.disconnect();
-        }
-      },
-      { rootMargin: '200px' }
-    );
+    let observer;
+    let localController;
+    let cancelled = false;
 
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+    const imdbID = details?.imdbID;
 
-  const imdbID = details?.imdbID;
-
-  useEffect(() => {
+    // If we get an imdbID and it hasn't been processed, trigger shouldLoadSimilar
     if (imdbID && !processedSimilarForIdRef.current.has(imdbID)) {
       setShouldLoadSimilar(true);
     }
-  }, [imdbID, setShouldLoadSimilar]);
 
-  useEffect(() => {
-    if (!shouldLoadSimilar) return;
-
-    if (!imdbID) {
-      setSimilarMovies([]);
-      return;
+    // Attach observer only if not already decided to load
+    if (!shouldLoadSimilar) {
+      const el = similarRef.current;
+      if (el && typeof IntersectionObserver !== 'undefined') {
+        observer = new IntersectionObserver(
+          ([entry]) => {
+            if (entry.isIntersecting) {
+              setShouldLoadSimilar(true);
+              observer.disconnect();
+            }
+          },
+          { rootMargin: '200px' }
+        );
+        observer.observe(el);
+      }
     }
 
-    if (processedSimilarForIdRef.current.has(imdbID)) {
-      return;
-    }
+    const runFetchSimilar = async () => {
+      const imdb = details?.imdbID;
+      if (!shouldLoadSimilar) return;
+      if (!imdb) {
+        // Do not clear similarMovies here — keep previous content until we know there are no results.
+        return;
+      }
+      if (processedSimilarForIdRef.current.has(imdb)) return;
+      if (inFlightSimilarRef.current.has(imdb)) return;
+      inFlightSimilarRef.current.add(imdb);
 
-    if (inFlightSimilarRef.current.has(imdbID)) {
-      return;
-    }
-    inFlightSimilarRef.current.add(imdbID);
+      localController = new AbortController();
+      const { signal } = localController;
 
-    const controller = new AbortController();
-    const { signal } = controller;
-    let cancelled = false;
+      cancelled = false;
+      let phrase = '';
+      if (details?.Genre) {
+        const g = details.Genre.split(',')[0]?.trim();
+        if (g) phrase = g;
+      }
+      if (!phrase && details?.Title) {
+        const token = details.Title.split(/\s+/).find((w) => w.length > 3);
+        if (token) phrase = token;
+      }
+      if (!phrase) {
+        // no phrase -> we won't overwrite existing similarMovies; just mark processed so we don't try again
+        processedSimilarForIdRef.current.add(imdb);
+        inFlightSimilarRef.current.delete(imdb);
+        return;
+      }
 
-    let phrase = '';
-    if (details?.Genre) {
-      const g = details.Genre.split(',')[0]?.trim();
-      if (g) phrase = g;
-    }
-    if (!phrase && details?.Title) {
-      const token = details.Title.split(/\s+/).find((w) => w.length > 3);
-      if (token) phrase = token;
-    }
-    if (!phrase) {
-      setSimilarMovies([]);
-      inFlightSimilarRef.current.delete(imdbID);
-      return;
-    }
-
-    (async () => {
       setLoadingSimilar(true);
       try {
         const res = await searchMovies(phrase, 1, { signal });
 
         const items = Array.isArray(res?.Search) ? res.Search : [];
         const cards = items
-          .filter((s) => s?.imdbID && s.imdbID !== imdbID)
+          .filter((s) => s?.imdbID && s.imdbID !== imdb)
           .slice(0, 8)
           .map((s) => ({
             id: s.imdbID,
@@ -202,8 +200,9 @@ export default function MovieDetails() {
           }));
 
         if (!cancelled) {
+          // Replace similarMovies only when we get results (or explicit empty list)
           setSimilarMovies(cards);
-          processedSimilarForIdRef.current.add(imdbID);
+          processedSimilarForIdRef.current.add(imdb);
         }
       } catch (e) {
         if (
@@ -212,20 +211,28 @@ export default function MovieDetails() {
           e?.name !== 'CanceledError'
         ) {
           console.error('similar fetch failed', e);
-          setSimilarMovies([]);
+          // On error, don't clear existing similarMovies; just leave what user currently sees
         }
       } finally {
-        inFlightSimilarRef.current.delete(imdbID);
+        inFlightSimilarRef.current.delete(imdb);
         if (!cancelled) setLoadingSimilar(false);
       }
-    })();
+    };
+
+    if (shouldLoadSimilar) {
+      runFetchSimilar();
+    }
 
     return () => {
       cancelled = true;
-      controller.abort();
+      observer && observer.disconnect();
+      localController && localController.abort();
     };
-  }, [shouldLoadSimilar, imdbID, details]);
+  }, [details, shouldLoadSimilar]);
 
+  // -------------------------------
+  // handlePlayTrailer (unchanged)
+  // -------------------------------
   const handlePlayTrailer = async () => {
     setTrailerError('');
 
@@ -237,7 +244,9 @@ export default function MovieDetails() {
             onSuccess: async () => {
               try {
                 await handlePlayTrailer();
-              } catch {}
+              } catch {
+                // ignore
+              }
             },
           },
         })
@@ -279,14 +288,17 @@ export default function MovieDetails() {
       setLoadingTrailer(false);
     }
   };
-  const posterUrl = useMemo(() => {
-    const p =
-      details?.Poster ||
-      (details?.poster_path
-        ? `https://image.tmdb.org/t/p/w500${details.poster_path}`
-        : null);
-    return p && p !== 'N/A' ? p : undefined;
-  }, [details]);
+
+  
+const TMDB_IMG_BASE = process.env.REACT_APP_TMDB_IMG_BASE
+
+const posterUrl = useMemo(() => {
+  const p =
+    details?.Poster ||
+    (details?.poster_path ? `${TMDB_IMG_BASE}${details.poster_path}` : null);
+  return p && p !== 'N/A' ? p : undefined;
+}, [details, TMDB_IMG_BASE])
+
 
   const imdbUrl = useMemo(() => {
     return details?.imdbID;
