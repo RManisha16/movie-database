@@ -22,11 +22,6 @@ export default function MovieDetails() {
   const [videoId, setVideoId] = useState(null);
   const [loadingTrailer, setLoadingTrailer] = useState(false);
   const [trailerError, setTrailerError] = useState('');
-<<<<<<< HEAD
-  
-=======
-  const [similarError, setSimilarError] = useState('');
->>>>>>> 5332245 (Updated movie app: added footer, updated ui)
   const [similarMovies, setSimilarMovies] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [shouldLoadSimilar, setShouldLoadSimilar] = useState(false);
@@ -116,7 +111,6 @@ export default function MovieDetails() {
     const imdbID = details?.imdbID;
     if (imdbID && !processedSimilarForIdRef.current.has(imdbID)) {
       setShouldLoadSimilar(true);
-      setSimilarError('');
     }
 
     if (!shouldLoadSimilar) {
@@ -126,7 +120,6 @@ export default function MovieDetails() {
           ([entry]) => {
             if (entry.isIntersecting) {
               setShouldLoadSimilar(true);
-              setSimilarError('');
               observer.disconnect();
             }
           },
@@ -140,10 +133,6 @@ export default function MovieDetails() {
       const imdb = details?.imdbID;
       if (!shouldLoadSimilar) return;
       if (!imdb) {
-<<<<<<< HEAD
-=======
-        setSimilarError('Similar titles require a valid IMDb ID.');
->>>>>>> 5332245 (Updated movie app: added footer, updated ui)
         return;
       }
       if (processedSimilarForIdRef.current.has(imdb)) return;
@@ -164,13 +153,6 @@ export default function MovieDetails() {
         if (token) phrase = token;
       }
       if (!phrase) {
-<<<<<<< HEAD
-=======
-        // no phrase -> we won't overwrite existing similarMovies; just mark processed so we don't try again
-        setSimilarError(
-          'No suitable keyword found to search for similar titles.'
-        );
->>>>>>> 5332245 (Updated movie app: added footer, updated ui)
         processedSimilarForIdRef.current.add(imdb);
         inFlightSimilarRef.current.delete(imdb);
         return;
@@ -202,15 +184,6 @@ export default function MovieDetails() {
           e?.name !== 'AbortError' &&
           e?.name !== 'CanceledError'
         ) {
-<<<<<<< HEAD
-=======
-          setSimilarError(
-            e?.message ||
-              'Unable to load similar titles. Please try again later.'
-          );
-
-          // On error, don't clear existing similarMovies; just leave what user currently sees
->>>>>>> 5332245 (Updated movie app: added footer, updated ui)
         }
       } finally {
         inFlightSimilarRef.current.delete(imdb);
@@ -241,13 +214,12 @@ export default function MovieDetails() {
               try {
                 await handlePlayTrailer();
               } catch {
-                // ignore
-              }
+                setTrailerError(`Unable to fetch trailer. Please try again later or search manually: ${fallbackUrl}`);              }
             },
           },
         })
       );
-      return;
+      return { ok: false, message: 'Authentication required to play trailers.' };
     }
 
     if (videoId) {
