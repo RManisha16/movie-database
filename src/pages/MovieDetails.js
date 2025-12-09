@@ -17,6 +17,7 @@ export default function MovieDetails() {
   const [details, setDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [detailsError, setDetailsError] = useState('');
+  
 
   const [openTrailer, setOpenTrailer] = useState(false);
   const [videoId, setVideoId] = useState(null);
