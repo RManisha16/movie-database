@@ -22,19 +22,15 @@ export default function MovieDetails() {
   const [videoId, setVideoId] = useState(null);
   const [loadingTrailer, setLoadingTrailer] = useState(false);
   const [trailerError, setTrailerError] = useState('');
-
+  
   const [similarMovies, setSimilarMovies] = useState([]);
   const [loadingSimilar, setLoadingSimilar] = useState(false);
   const [shouldLoadSimilar, setShouldLoadSimilar] = useState(false);
 
   const similarRef = useRef(null);
-  // Keep per-instance processed/in-flight sets for similar fetches (these are fine as refs)
   const processedSimilarForIdRef = useRef(new Set());
   const inFlightSimilarRef = useRef(new Set());
 
-  // -------------------------------
-  // Effect 1: Fetch movie details using module-level caching to prevent duplicate fetches
-  // -------------------------------
   useEffect(() => {
     if (!id) {
       setDetails(null);
@@ -43,32 +39,25 @@ export default function MovieDetails() {
       return;
     }
 
-    // If we already have resolved data cached, use it (fast path)
     if (detailsDataCache.has(id)) {
       setDetails(detailsDataCache.get(id));
       setDetailsError('');
       setLoadingDetails(false);
-      // note: we intentionally do NOT clear similarMovies here to preserve existing similar items
       return;
     }
 
     setLoadingDetails(true);
     setDetailsError('');
-    // Do not clear details synchronously here to avoid jarring UI flashes.
-    // setDetails(null);
 
     let cancelled = false;
     let promise = detailsPromiseCache.get(id);
 
     if (!promise) {
-      // create a promise and store it globally so remounts reuse it
-      // we don't attach AbortController here to keep a single shared promise.
       promise = (async () => {
         try {
           const res = await getMovieDetails(id);
           return res;
         } catch (e) {
-          // rethrow so callers can handle error
           throw e;
         }
       })();
@@ -80,8 +69,6 @@ export default function MovieDetails() {
         const res = await promise;
 
         if (cancelled) return;
-
-        // Cache the resolved data for future mounts
         try {
           detailsDataCache.set(id, res);
         } catch (err) {
@@ -100,12 +87,10 @@ export default function MovieDetails() {
         }
       } catch (e) {
         if (!cancelled) {
-          console.error('getMovieDetails failed:', e);
           setDetails(null);
           setDetailsError(
             'Unable to load movie details. Please try again later.'
           );
-          // On error we can remove the promise so a retry attempt will re-fetch
           detailsPromiseCache.delete(id);
           detailsDataCache.delete(id);
         }
@@ -116,26 +101,19 @@ export default function MovieDetails() {
 
     return () => {
       cancelled = true;
-      // we intentionally DO NOT abort the shared promise here because it might be used by another mount
     };
   }, [id]);
 
-  // -------------------------------
-  // Effect 2: IntersectionObserver + imdb -> shouldLoadSimilar + fetch similar
-  // -------------------------------
   useEffect(() => {
     let observer;
     let localController;
     let cancelled = false;
 
     const imdbID = details?.imdbID;
-
-    // If we get an imdbID and it hasn't been processed, trigger shouldLoadSimilar
     if (imdbID && !processedSimilarForIdRef.current.has(imdbID)) {
       setShouldLoadSimilar(true);
     }
 
-    // Attach observer only if not already decided to load
     if (!shouldLoadSimilar) {
       const el = similarRef.current;
       if (el && typeof IntersectionObserver !== 'undefined') {
@@ -156,7 +134,6 @@ export default function MovieDetails() {
       const imdb = details?.imdbID;
       if (!shouldLoadSimilar) return;
       if (!imdb) {
-        // Do not clear similarMovies here — keep previous content until we know there are no results.
         return;
       }
       if (processedSimilarForIdRef.current.has(imdb)) return;
@@ -177,7 +154,6 @@ export default function MovieDetails() {
         if (token) phrase = token;
       }
       if (!phrase) {
-        // no phrase -> we won't overwrite existing similarMovies; just mark processed so we don't try again
         processedSimilarForIdRef.current.add(imdb);
         inFlightSimilarRef.current.delete(imdb);
         return;
@@ -200,7 +176,6 @@ export default function MovieDetails() {
           }));
 
         if (!cancelled) {
-          // Replace similarMovies only when we get results (or explicit empty list)
           setSimilarMovies(cards);
           processedSimilarForIdRef.current.add(imdb);
         }
@@ -210,8 +185,6 @@ export default function MovieDetails() {
           e?.name !== 'AbortError' &&
           e?.name !== 'CanceledError'
         ) {
-          console.error('similar fetch failed', e);
-          // On error, don't clear existing similarMovies; just leave what user currently sees
         }
       } finally {
         inFlightSimilarRef.current.delete(imdb);
@@ -230,9 +203,6 @@ export default function MovieDetails() {
     };
   }, [details, shouldLoadSimilar]);
 
-  // -------------------------------
-  // handlePlayTrailer (unchanged)
-  // -------------------------------
   const handlePlayTrailer = async () => {
     setTrailerError('');
 
@@ -256,13 +226,14 @@ export default function MovieDetails() {
 
     if (videoId) {
       setOpenTrailer(true);
-      return;
+      return { ok: true };
     }
 
     const title = details?.Title ?? details?.title ?? '';
     if (!title) {
-      setTrailerError('Trailer not available for this title.');
-      return;
+      const msg = 'Trailer not available for this title.';
+      setTrailerError(msg);
+      return { ok: false, message: msg };
     }
 
     const fallbackUrl =
@@ -289,16 +260,14 @@ export default function MovieDetails() {
     }
   };
 
-  
-const TMDB_IMG_BASE = process.env.REACT_APP_TMDB_IMG_BASE
+  const TMDB_IMG_BASE = process.env.REACT_APP_TMDB_IMG_BASE;
 
-const posterUrl = useMemo(() => {
-  const p =
-    details?.Poster ||
-    (details?.poster_path ? `${TMDB_IMG_BASE}${details.poster_path}` : null);
-  return p && p !== 'N/A' ? p : undefined;
-}, [details, TMDB_IMG_BASE])
-
+  const posterUrl = useMemo(() => {
+    const p =
+      details?.Poster ||
+      (details?.poster_path ? `${TMDB_IMG_BASE}${details.poster_path}` : null);
+    return p && p !== 'N/A' ? p : undefined;
+  }, [details, TMDB_IMG_BASE]);
 
   const imdbUrl = useMemo(() => {
     return details?.imdbID;
