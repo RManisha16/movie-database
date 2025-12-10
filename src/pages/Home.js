@@ -18,7 +18,7 @@ const Home = () => {
 
     return searchMovies('movie', pageNum)
       .then((res) => {
-        const json = res?.data ?? res; 
+        const json = res?.data ?? res;
         if (json?.Response === 'True' && Array.isArray(json?.Search)) {
           const mapped = json.Search.slice(0, MAX_DETAILS).map((m) => ({
             id: m.imdbID,
@@ -41,7 +41,7 @@ const Home = () => {
           e?.message ||
           'Failed to fetch trending movies.';
         setMovies([]);
-        return { ok: false, message: msg }; 
+        return { ok: false, message: msg };
       })
       .finally(() => {
         setLoading(false);
