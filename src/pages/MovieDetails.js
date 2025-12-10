@@ -17,7 +17,6 @@ export default function MovieDetails() {
   const [details, setDetails] = useState(null);
   const [loadingDetails, setLoadingDetails] = useState(true);
   const [detailsError, setDetailsError] = useState('');
-  
 
   const [openTrailer, setOpenTrailer] = useState(false);
   const [videoId, setVideoId] = useState(null);
@@ -215,12 +214,18 @@ export default function MovieDetails() {
               try {
                 await handlePlayTrailer();
               } catch {
-                setTrailerError(`Unable to fetch trailer. Please try again later or search manually: ${fallbackUrl}`);              }
+                setTrailerError(
+                  `Unable to fetch trailer. Please try again later or search manually: ${fallbackUrl}`
+                );
+              }
             },
           },
         })
       );
-      return { ok: false, message: 'Authentication required to play trailers.' };
+      return {
+        ok: false,
+        message: 'Authentication required to play trailers.',
+      };
     }
 
     if (videoId) {

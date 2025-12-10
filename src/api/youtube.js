@@ -17,9 +17,8 @@ export const searchTrailerVideoId = async (title) => {
     });
 
     const item = data?.items?.[0];
-    return { ok: true, videoId: item?.id?.videoId};
+    return { ok: true, videoId: item?.id?.videoId };
   } catch (err) {
-    // Return a structured error message
     return {
       ok: false,
       message:

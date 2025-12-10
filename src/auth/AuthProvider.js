@@ -24,7 +24,6 @@ function readUsers() {
     const raw = localStorage.getItem(USERS_KEY);
     return raw ? JSON.parse(raw) : [];
   } catch (err) {
-    // Throw so callers can handle uniformly.
     throw new Error(`Failed to read users: ${err?.message || 'unknown error'}`);
   }
 }
@@ -33,7 +32,6 @@ function writeUsers(users) {
   try {
     localStorage.setItem(USERS_KEY, JSON.stringify(users));
   } catch (err) {
-    // Throw so callers can handle uniformly.
     throw new Error(
       `Failed to write users: ${err?.message || 'unknown error'}`
     );
@@ -53,8 +51,6 @@ export default function AuthProvider({ children }) {
         setUser(null);
       }
     } catch (err) {
-      // In effects we can't "return" an error to the caller; log and set to a safe state.
-      console.error('Failed to initialize auth from storage:', err);
       setUser(null);
     } finally {
       setInitializing(false);
@@ -139,7 +135,6 @@ export default function AuthProvider({ children }) {
     try {
       localStorage.removeItem(CURRENT_KEY);
     } catch (err) {
-      // Return an error so callers can react (e.g., show toast).
       return { ok: false, message: err.message || 'Failed to clear session' };
     }
     setUser(null);

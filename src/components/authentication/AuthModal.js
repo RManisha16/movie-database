@@ -63,7 +63,7 @@ export default function AuthModal({
         return { ok: false, message: msg };
       }
     } catch (err) {
-      const msg = err?.message || 'Unexpected error'; 
+      const msg = err?.message || 'Unexpected error';
       setError(msg);
       return { ok: false, message: msg };
     } finally {

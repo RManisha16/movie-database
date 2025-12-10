@@ -21,22 +21,54 @@ export function clearOmdbCache() {
 }
 
 export const searchMovies = async (query, page = 1, axiosConfig = {}) => {
-  const { data } = await omdb.get('', {
-    ...axiosConfig,
-    params: {
-      ...(axiosConfig.params || {}),
-      type: 'movie',
-      s: query,
-      page,
-    },
-  });
-  return data;
+  try {
+    const { data } = await omdb.get('', {
+      ...axiosConfig,
+      params: {
+        ...(axiosConfig.params || {}),
+        type: 'movie',
+        s: query,
+        page,
+      },
+    });
+
+    if (!data || typeof data !== 'object') {
+      return { Response: 'False', Error: 'Invalid response from OMDb.' };
+    }
+    return data;
+  } catch (err) {
+    if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED') {
+      return { Response: 'False', Error: 'Request canceled.' };
+    }
+    const msg =
+      err?.response?.data?.Error ||
+      err?.response?.data?.message ||
+      err?.message ||
+      'Unable to search movies at the moment.';
+    return { Response: 'False', Error: msg };
+  }
 };
 
 export const getMovieDetails = async (imdbId, axiosConfig = {}) => {
-  const { data } = await omdb.get('', {
-    ...axiosConfig,
-    params: { ...(axiosConfig.params || {}), i: imdbId, plot: 'full' },
-  });
-  return data;
+  try {
+    const { data } = await omdb.get('', {
+      ...axiosConfig,
+      params: { ...(axiosConfig.params || {}), i: imdbId, plot: 'full' },
+    });
+
+    if (!data || typeof data !== 'object') {
+      return { Response: 'False', Error: 'Invalid response from OMDb.' };
+    }
+    return data;
+  } catch (err) {
+    if (err?.name === 'CanceledError' || err?.code === 'ERR_CANCELED') {
+      return { Response: 'False', Error: 'Request canceled.' };
+    }
+    const msg =
+      err?.response?.data?.Error ||
+      err?.response?.data?.message ||
+      err?.message ||
+      'Unable to load movie details.';
+    return { Response: 'False', Error: msg };
+  }
 };

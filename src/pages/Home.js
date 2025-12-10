@@ -16,10 +16,9 @@ const Home = () => {
     setLoading(true);
     setMovies([]);
 
-    // If searchMovies is Axios-based, it returns a response object
     return searchMovies('movie', pageNum)
       .then((res) => {
-        const json = res?.data ?? res; // supports both axios and fetch shapes
+        const json = res?.data ?? res; 
         if (json?.Response === 'True' && Array.isArray(json?.Search)) {
           const mapped = json.Search.slice(0, MAX_DETAILS).map((m) => ({
             id: m.imdbID,
@@ -28,11 +27,11 @@ const Home = () => {
             poster: m.Poster,
           }));
           setMovies(mapped);
-          return { ok: true }; 
+          return { ok: true };
         } else {
-          const msg = json?.Error || 'No movies found for the current page.'; 
+          const msg = json?.Error || 'No movies found for the current page.';
           setMovies([]);
-          return { ok: false, message: msg }; 
+          return { ok: false, message: msg };
         }
       })
       .catch((e) => {
@@ -42,7 +41,7 @@ const Home = () => {
           e?.message ||
           'Failed to fetch trending movies.';
         setMovies([]);
-        return { ok: false, message: msg }; // <-- structured error from catch
+        return { ok: false, message: msg }; 
       })
       .finally(() => {
         setLoading(false);

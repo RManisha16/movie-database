@@ -29,7 +29,6 @@ const MovieCard = ({ movie }) => {
     return `${YT_SEARCH_BASE}${encodeURIComponent(query)}`;
   }, [YT_SEARCH_BASE, title, movie]);
 
-
   const attemptPlay = async () => {
     if (videoId) {
       setOpenTrailer(true);
